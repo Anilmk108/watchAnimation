@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>&lt;model-viewer&gt; template</title>
+    <meta charset="utf-8">
+    <meta name="description" content="&lt;model-viewer&gt; template">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" href="./styles.css" rel="stylesheet"/>
+    <!-- OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+    <script src="./focus-visible.js" defer></script>
+    <script src="./w3.js" defer></script>
+
+  </head>
+  <body>
+    <!-- <model-viewer> HTML element -->
+
+    <!-- Model 1 -->
+    <model-viewer id="model1" interpolation-decay="" disable-zoom src="./Eos_Programmable_Q125.glb" alt="A 3D model of a Pixel 8 phone" shadow-intensity="1" camera-orbit="-0.6175deg 87.61deg 0.326m" field-of-view="30deg" field-of-view="30deg" auto-rotate rotation-per-second="90deg" auto-rotate-delay="6500" class="show">
+      <div id="progress-bar-d" slot="progress-bar"></div>
+    </model-viewer>
+
+    <!-- Model 2 -->
+    <model-viewer id="model2" interpolation-decay="" disable-zoom src="./Eos_Programmable_Q126.glb" alt="A 3D model of a Pixel 8 Pro phone" shadow-intensity="1" camera-orbit="-0.3497deg 87.77deg 0.353m" field-of-view="30deg" auto-rotate rotation-per-second="90deg" auto-rotate-delay="6500" class="hide">
+      <div id="progress-bar-d" slot="progress-bar"></div>
+    </model-viewer>
+
+    <!-- Switcher -->
+    <label id="switch" class="switch">
+      <input type="checkbox" checked>
+      <span class="slider round"></span>
+        <div id="labelbox" class="labelbox">
+            <div id="model-label">Pixel Watch<div>
+        </div>
+    </label>
+
+    <script>
+        // Model 1
+        const modelViewer1 = document.querySelector('#model1');
+        var firstTimeRound1 = false;
+
+        // Model 2
+        const modelViewer2 = document.querySelector('#model2');
+        var firstTimeRound2 = false;
+
+         // For mobile devices, make font larger and move button to bottom
+            if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                document.getElementById('labelbox').classList.add('labelbox-mob');
+                document.getElementById('switch').classList.add('switch-mob');
+
+            }
+
+
+        modelViewer1.addEventListener("load", () => {
+
+            const createAndApplyPhoneTexture = async (model, material, channel, color) => {
+                const texture = await model.createTexture(color);
+                if (channel.includes('base') || channel.includes('metallic')) {
+                    material.pbrMetallicRoughness[channel].setTexture(texture);
+                } else {
+                    material[channel].setTexture(texture);
+                }
+            }
+
+            // Switcher
+            var currentModel = "model1";
+            document.querySelectorAll('input[type=checkbox]')[0].addEventListener('click', (e) => {
+                console.log("clicked");
+                if (currentModel == "model1") {
+                    document.getElementById("model-label").innerHTML = 'Pixel 3';
+                    modelViewer2.cameraOrbit = "2.734deg 85.86deg 0.35m";
+                    modelViewer2.resetTurntableRotation(0);
+                    // document.getElementById("model2").style.visibility = "visible";
+                    modelViewer2.classList.add('show');
+                    modelViewer2.classList.remove('hide');
+                    modelViewer1.classList.add('hide');
+                    modelViewer1.classList.remove('show');
+                    currentModel = "model2";
+                } else {
+                    document.getElementById("model-label").innerHTML = 'Pixel 2';
+                    modelViewer1.cameraOrbit = "2.734deg 85.86deg 0.35m";
+                    modelViewer1.interactionPrompt = 'none';
+                    modelViewer1.resetTurntableRotation(0);
+                    // document.getElementById("model2").style.visibility = "hidden";
+                    modelViewer1.classList.add('show');
+                    modelViewer1.classList.remove('hide');
+                    modelViewer2.classList.add('hide');
+                    modelViewer2.classList.remove('show');
+                    currentModel = "model1";
+
+                }
+            });
+
+            // Model 1
+            modelViewer1.style.transform = 'scale(0.95)';
+
+            //Add camera-controls after zooming-in
+            setInterval(() => {
+                document.getElementById("model1").setAttribute("camera-controls", "");
+                document.getElementById("model1").setAttribute("touch-action", "pan-y");
+            }, 3000);
+
+            const textureCycle11 = [
+                'a.jpg',
+                'a.jpg',
+                'a.jpg',
+                'a.jpg',
+                'a.jpg',
+                'a.jpg',
+            ];
+
+            const textureCycle12 = [
+                'a.jpg',
+                'a.jpg',
+                'a.jpg',
+            ];
+
+            const textureCycle13 = [
+                'a.jpg',
+                'a.jpg',
+                'a.jpg',
+            ];
+
+
+            // Make sure that the correct material is selected here
+            const phoneMaterial11 = modelViewer1.model.materials[3];
+            const phoneMaterial12 = modelViewer1.model.materials[0];
+            const phoneMaterial13 = modelViewer1.model.materials[2];
+
+
+            setInterval(() => {
+
+                // If first time then 0 if not then the rest
+                let currentTextureIndex1 = firstTimeRound1 ? textureCycle12.indexOf(phoneMaterial12.pbrMetallicRoughness["baseColorTexture"].texture.source.name) : 0;
+
+                switch (currentTextureIndex1 + 1) {
+                    case 0:
+                        //Colour1: Obsidian
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial11, 'baseColorTexture', textureCycle11[0]);
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial11, 'emissiveTexture', textureCycle11[1]);
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial12, 'baseColorTexture', textureCycle12[0]);
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial13, 'baseColorTexture', textureCycle13[0]);
+                        break;
+                    case 1:
+                        //Colour2: Hazel
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial11, 'baseColorTexture', textureCycle11[2]);
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial11, 'emissiveTexture', textureCycle11[3]);
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial12, 'baseColorTexture', textureCycle12[1]);
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial13, 'baseColorTexture', textureCycle13[1]);
+                        break;
+                    case 2:
+                        //Colour3: Rose
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial11, 'baseColorTexture', textureCycle11[4]);
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial11, 'emissiveTexture', textureCycle11[5]);
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial12, 'baseColorTexture', textureCycle12[2]);
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial13, 'baseColorTexture', textureCycle13[2]);
+                        break;
+                    default:
+                        //Colour1
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial11, 'baseColorTexture', textureCycle11[0]);
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial11, 'emissiveTexture', textureCycle11[1]);
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial12, 'baseColorTexture', textureCycle12[0]);
+                        createAndApplyPhoneTexture(modelViewer1, phoneMaterial13, 'baseColorTexture', textureCycle13[0]);
+                }
+
+                firstTimeRound1 = true;
+
+            },2000);
+
+
+            // Model 2
+            modelViewer2.addEventListener("load", () => {
+
+                //Add camera-controls after zooming-in
+                setInterval(() => {
+                   document.getElementById("model2").setAttribute("camera-controls", "");
+                   // document.getElementById("model2").setAttribute("touch-action", "pan-y");
+                }, 3000);
+
+                const textureCycle21 = [
+                    'a.jpg',
+                    'a.jpg',
+                    'a.jpg',
+                    'a.jpg',
+                    'a.jpg',
+                    'a.jpg',
+                ];
+
+                const textureCycle22 = [
+                    'a.jpg',
+                    'a.jpg',
+                    'a.jpg',
+                ];
+
+                const textureCycle23 = [
+                    'a.jpg',
+                    'a.jpg',
+                    'a.jpg',
+                ];
+
+                
+                // Make sure that the correct material is selected here
+                const phoneMaterial21 = modelViewer2.model.materials[3];
+                const phoneMaterial22 = modelViewer2.model.materials[0];
+                const phoneMaterial23 = modelViewer2.model.materials[2];
+
+
+                setInterval(() => {
+
+                    // If first time then 0 if not then the rest
+                    let currentTextureIndex2 = firstTimeRound2 ? textureCycle21.indexOf(phoneMaterial21.pbrMetallicRoughness["baseColorTexture"].texture.source.name) : 0;
+
+                    console.log(currentTextureIndex2);
+
+                    switch (currentTextureIndex2 + 2) {
+                        case 0:
+                            //Colour1 Snow
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial21, 'baseColorTexture', textureCycle21[0]);
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial21, 'emissiveTexture', textureCycle21[1]);
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial22, 'baseColorTexture', textureCycle22[0]);
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial23, 'baseColorTexture', textureCycle23[0]);
+                            break;
+                        case 2:
+                            //Colour2 Obsidian
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial21, 'baseColorTexture', textureCycle21[2]);
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial21, 'emissiveTexture', textureCycle21[3]);
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial22, 'baseColorTexture', textureCycle22[1]);
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial23, 'baseColorTexture', textureCycle23[0]); //1
+                            break;
+                        case 4:
+                            //Colour3 Hazel
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial21, 'baseColorTexture', textureCycle21[4]);
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial21, 'emissiveTexture', textureCycle21[5]);
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial22, 'baseColorTexture', textureCycle22[2]);
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial23, 'baseColorTexture', textureCycle23[0]); //2
+                            break;
+                        default:
+                            //Colour1
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial21, 'baseColorTexture', textureCycle21[0]);
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial21, 'emissiveTexture', textureCycle21[1]);
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial22, 'baseColorTexture', textureCycle22[0]);
+                            createAndApplyPhoneTexture(modelViewer2, phoneMaterial23, 'baseColorTexture', textureCycle23[0]);
+                    }
+
+                    firstTimeRound2 = true;
+
+                },2000);
+            });
+        });
+    </script>
+    <!-- Loads <model-viewer> for browsers: -->
+    <script type="module" src="./model-viewer.min.js"></script>
+  </body>
+</html>
